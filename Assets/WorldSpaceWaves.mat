@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: WorldSpaceWaves
+  m_Shader: {fileID: -6465566751694194690, guid: fdd10ac387a323a438608f43d8a63bdb, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Normal:
+        m_Texture: {fileID: 2800000, guid: 80d001c3b27abf34d9870708798b1791, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_265a2aa11c964985918db93571eaaea7_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 45bd5a2bddde11746b2b8b50b4570486, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_3849b46f74244d398e916d509d1b6bf5_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 45bd5a2bddde11746b2b8b50b4570486, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_7beb2868491b4f8a80503931524dcb0f_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 45bd5a2bddde11746b2b8b50b4570486, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Crest_End: 1.76
+    - _Crest_Start: -0
+    - _Depth: 5.39
+    - _Displacement: 0.2
+    - _FoamDepth: 0.9
+    - _NormalSpeed: 10
+    - _NormalStrength: 1.04
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _SwellFade: 3.71
+    - _SwellSpeed: 231.92
+    - _dplace: 0.09
+    - _noisescale: 0.2
+    - _rotateWorld: -285.72
+    - _speedworld: 200.94
+    m_Colors:
+    - _DeepWater: {r: 0.47058824, g: 0.8125971, b: 0.9254902, a: 1}
+    - _ShallowWater: {r: 0.4784314, g: 0.7686275, b: 0.85098046, a: 1}
+    - _ShoreLineDirection: {r: 0, g: 0, b: 0, a: 0}
+    - _ShoreLineEndTransform: {r: 0, g: 42.53, b: 0, a: 0}
+    - _ShoreLineStartTransform: {r: 0, g: 1.2, b: 0, a: 0}
+    - _WaveCrest: {r: 0.854902, g: 0.9960785, b: 1, a: 1}
+    - _axisofrotation: {r: 1, g: 0, b: 0, a: 0}
+    - _scaleworld: {r: -0.23, g: 0.08, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &7372918447572018394
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10
