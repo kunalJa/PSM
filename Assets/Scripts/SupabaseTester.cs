@@ -87,14 +87,22 @@ public class SupabaseTester : MonoBehaviour
             return;
         }
 
-        // Test: Get all friends
-        //await BeachService.Instance.GetAllFriends();
-
-        // Test: Check for unread posts
+        // Test: Unread posts workflow
+        Debug.Log("<color=magenta>--- Testing Unread Posts Workflow ---</color>");
+        
+        // Step 1: Get unread posts (should show all friend posts if none marked as read)
+        Debug.Log("Step 1: Getting unread posts...");
         await BeachService.Instance.GetUnreadPosts();
-
-        // Test: Create a post
-        await BeachService.Instance.CreatePost("The waves are calm today. Feeling grateful.");
+        
+        // Step 2: Mark the first unread post as read (you'll need to manually set a post ID here)
+        // For now, we'll skip this step - you can uncomment and add a real post ID later
+        string testPostId = "df548d59-a135-4109-9b82-731e18429301";
+        Debug.Log($"Step 2: Marking post {testPostId} as read...");
+        await BeachService.Instance.MarkAsRead(testPostId);
+        
+        // Step 3: Get unread posts again (should show one fewer post)
+        Debug.Log("Step 3: Getting unread posts again...");
+        await BeachService.Instance.GetUnreadPosts();
 
         Debug.Log("<color=yellow>--- Beach Tests Complete ---</color>");
     }

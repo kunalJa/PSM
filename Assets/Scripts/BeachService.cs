@@ -65,7 +65,7 @@ public class BeachService : MonoBehaviour
                 .Filter("user_id", Postgrest.Constants.Operator.Equals, currentUserId)
                 .Get();
 
-            var readPostIds = readResponse.Models.Select(r => r.PostId).ToList();
+            var readPostIds = readResponse.Models.Select(r => (object)r.PostId).ToList();
 
             // Get friend IDs
             var friendships = await Client.From<Friendship>()
@@ -80,13 +80,20 @@ public class BeachService : MonoBehaviour
                 return;
             }
 
-            // Get posts from friends
-            var postsResponse = await Client.From<Post>()
-                .Filter("author_id", Postgrest.Constants.Operator.In, friendIds)
+            // Get posts from friends, excluding already-read posts (server-side)
+            var query = Client.From<Post>()
+                .Filter("author_id", Postgrest.Constants.Operator.In, friendIds);
+            
+            if (readPostIds.Count > 0)
+            {
+                query = query.Not("id", Postgrest.Constants.Operator.In, readPostIds);
+            }
+            
+            var postsResponse = await query
                 .Order("created_at", Postgrest.Constants.Ordering.Descending)
                 .Get();
 
-            var unreadPosts = postsResponse.Models.Where(p => !readPostIds.Contains(p.Id)).ToList();
+            var unreadPosts = postsResponse.Models;
 
             if (unreadPosts.Count == 0)
             {
@@ -106,7 +113,7 @@ public class BeachService : MonoBehaviour
         }
     }
 
-    public async Task AddFriendByEmail(string email)
+    public async Task AddFriendByUsername(string username)
     {
         try
         {
@@ -117,14 +124,14 @@ public class BeachService : MonoBehaviour
                 return;
             }
 
-            // Find the profile with this email
+            // Find the profile with this username
             var profileResponse = await Client.From<Profile>()
-                .Filter("email", Postgrest.Constants.Operator.Equals, email)
+                .Filter("username", Postgrest.Constants.Operator.Equals, username)
                 .Single();
 
             if (profileResponse == null)
             {
-                Debug.LogWarning($"<color=orange>No user found with email: {email}</color>");
+                Debug.LogWarning($"<color=orange>No user found with username: {username}</color>");
                 return;
             }
 
@@ -138,7 +145,7 @@ public class BeachService : MonoBehaviour
 
             if (existingFriendship.Models.Count > 0)
             {
-                Debug.Log($"<color=cyan>Already friends with {email}!</color>");
+                Debug.Log($"<color=cyan>Already friends with {username}!</color>");
                 return;
             }
 
@@ -150,11 +157,11 @@ public class BeachService : MonoBehaviour
             };
 
             await Client.From<Friendship>().Insert(friendship);
-            Debug.Log($"<color=green>Added {email} as a friend!</color>");
+            Debug.Log($"<color=green>Added {username} as a friend!</color>");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"AddFriendByEmail failed: {e.Message}");
+            Debug.LogError($"AddFriendByUsername failed: {e.Message}");
         }
     }
 
