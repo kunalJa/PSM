@@ -36,4 +36,24 @@ public class AppManager : MonoBehaviour
         
         Debug.Log("Supabase is ready to bring in the mail!");
     }
+
+    public void SaveSession(string json)
+    {
+        // Scribble the login token onto the phone's memory
+        PlayerPrefs.SetString("supabase_session", json);
+        PlayerPrefs.Save();
+    }
+
+    public string GetSavedSession()
+    {
+        // Look at the notepad and see if we have a token
+        return PlayerPrefs.GetString("supabase_session", null);
+    }
+
+    public void ClearSession()
+    {
+        // Erase the notepad when the session is no longer valid
+        PlayerPrefs.DeleteKey("supabase_session");
+        PlayerPrefs.Save();
+    }
 }
