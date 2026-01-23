@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Threading.Tasks;
 using Supabase.Gotrue;
+using static Supabase.Gotrue.Constants;
 using System;
 
 public class SupabaseTester : MonoBehaviour
@@ -17,37 +18,28 @@ public class SupabaseTester : MonoBehaviour
 
         if (!string.IsNullOrEmpty(savedSessionJson))
         {
-            Debug.Log("Tester: Found saved session! Restoring...");
+            Debug.Log("Tester: Found saved session! Rehydrating via SDK...");
             
             try
             {
                 var savedSession = Newtonsoft.Json.JsonConvert.DeserializeObject<Session>(savedSessionJson);
                 
-                if (savedSession != null && !string.IsNullOrEmpty(savedSession.AccessToken) && !string.IsNullOrEmpty(savedSession.RefreshToken))
+                if (savedSession != null && !string.IsNullOrEmpty(savedSession.RefreshToken))
                 {
-                    // Step 1: Use SetAuth to initialize CurrentSession with access token
-                    client.Auth.SetAuth(savedSession.AccessToken);
+                    // Use the SDK's proper rehydration method: SignIn with RefreshToken
+                    // This internally sets CurrentSession, CurrentUser, and updates API headers
+                    var session = await client.Auth.SignIn(SignInType.RefreshToken, savedSession.RefreshToken);
                     
-                    // Step 2: Manually restore the refresh token on the session
-                    client.Auth.CurrentSession.RefreshToken = savedSession.RefreshToken;
-                    client.Auth.CurrentSession.ExpiresIn = savedSession.ExpiresIn;
-                    client.Auth.CurrentSession.CreatedAt = savedSession.CreatedAt;
-                    
-                    // Step 3: Check if expired and refresh if needed
-                    if (savedSession.ExpiresAt() <= DateTime.Now)
+                    if (session != null)
                     {
-                        Debug.Log("Tester: Token expired, refreshing...");
-                        var refreshedSession = await client.Auth.RefreshSession();
+                        // Save the fresh session with new tokens
+                        string freshJson = Newtonsoft.Json.JsonConvert.SerializeObject(session);
+                        AppManager.Instance.SaveSession(freshJson);
                         
-                        if (refreshedSession != null)
-                        {
-                            string freshJson = Newtonsoft.Json.JsonConvert.SerializeObject(refreshedSession);
-                            AppManager.Instance.SaveSession(freshJson);
-                        }
+                        Debug.Log($"<color=cyan>WELCOME BACK!</color> {client.Auth.CurrentUser?.Email}");
+                        await RunBeachTests();
+                        return;
                     }
-                    
-                    Debug.Log($"<color=cyan>WELCOME BACK!</color> {client.Auth.CurrentSession?.User?.Email}");
-                    return;
                 }
             }
             catch (Exception e)
@@ -76,11 +68,34 @@ public class SupabaseTester : MonoBehaviour
                 AppManager.Instance.SaveSession(sessionJson);
 
                 Debug.Log("<color=green>SUCCESS:</color> Logged in and Session Saved!");
+                await RunBeachTests();
             }
         }
         catch (System.Exception e)
         {
             Debug.LogError($"Login failed: {e.Message}");
         }
+    }
+
+    private async Task RunBeachTests()
+    {
+        Debug.Log("<color=yellow>--- Running Beach Service Tests ---</color>");
+        
+        if (BeachService.Instance == null)
+        {
+            Debug.LogWarning("BeachService not found. Create a GameObject with BeachService attached.");
+            return;
+        }
+
+        // Test: Get all friends
+        //await BeachService.Instance.GetAllFriends();
+
+        // Test: Check for unread posts
+        await BeachService.Instance.GetUnreadPosts();
+
+        // Test: Create a post
+        await BeachService.Instance.CreatePost("The waves are calm today. Feeling grateful.");
+
+        Debug.Log("<color=yellow>--- Beach Tests Complete ---</color>");
     }
 }
