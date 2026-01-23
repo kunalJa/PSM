@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "73a63b7f672b88f7e9992f6917eb458a8cbb6fa9"
+    },
     "com.unity.adaptiveperformance": {
       "version": "5.1.6",
       "depth": 1,
@@ -108,6 +115,13 @@
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.5",
       "depth": 3,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
