@@ -87,22 +87,49 @@ public class SupabaseTester : MonoBehaviour
             return;
         }
 
-        // Test: Unread posts workflow
-        Debug.Log("<color=magenta>--- Testing Unread Posts Workflow ---</color>");
+        // Test: Notifications workflow
+        Debug.Log("<color=magenta>--- Testing Notifications Workflow ---</color>");
         
-        // Step 1: Get unread posts (should show all friend posts if none marked as read)
-        Debug.Log("Step 1: Getting unread posts...");
-        await BeachService.Instance.GetUnreadPosts();
+        // Step 1: Get all notifications
+        Debug.Log("Step 1: Fetching notifications...");
+        var notifications = await BeachService.Instance.GetNotifications();
         
-        // Step 2: Mark the first unread post as read (you'll need to manually set a post ID here)
-        // For now, we'll skip this step - you can uncomment and add a real post ID later
-        string testPostId = "df548d59-a135-4109-9b82-731e18429301";
-        Debug.Log($"Step 2: Marking post {testPostId} as read...");
-        await BeachService.Instance.MarkAsRead(testPostId);
-        
-        // Step 3: Get unread posts again (should show one fewer post)
-        Debug.Log("Step 3: Getting unread posts again...");
-        await BeachService.Instance.GetUnreadPosts();
+        // Step 2: Mark the first unread notification as read (if any exist)
+        if (notifications.Count > 0)
+        {
+            var firstNotif = notifications[0];
+            if (!firstNotif.IsRead)
+            {
+                Debug.Log($"Step 2: Marking notification {firstNotif.Id} as read...");
+                await BeachService.Instance.MarkNotificationAsRead(firstNotif.Id);
+                
+                // Step 3: Fetch notifications again to confirm the marked one is filtered out
+                Debug.Log("Step 3: Fetching notifications again to confirm...");
+                var updatedNotifications = await BeachService.Instance.GetNotifications();
+                
+                if (updatedNotifications.Count < notifications.Count)
+                {
+                    Debug.Log($"<color=green>SUCCESS:</color> Notification count reduced from {notifications.Count} to {updatedNotifications.Count}");
+                }
+                else
+                {
+                    Debug.LogWarning($"<color=orange>UNEXPECTED:</color> Notification count did not decrease (was {notifications.Count}, now {updatedNotifications.Count})");
+                }
+            }
+            else
+            {
+                Debug.Log("Step 2: First notification already read, skipping mark as read test.");
+            }
+        }
+        else
+        {
+            Debug.Log("Step 2-3: No notifications to test with.");
+        }
+
+        // Test: Delete friend (commented out - uncomment with a real friend_id to test)
+        // Debug.Log("<color=magenta>--- Testing Delete Friend ---</color>");
+        // string testFriendId = "some-friend-uuid-here";
+        // await BeachService.Instance.DeleteFriend(testFriendId);
 
         Debug.Log("<color=yellow>--- Beach Tests Complete ---</color>");
     }

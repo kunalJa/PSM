@@ -247,4 +247,95 @@ public class BeachService : MonoBehaviour
             Debug.LogError($"MarkAsRead failed: {e.Message}");
         }
     }
+
+    public async Task<List<SystemNotification>> GetNotifications()
+    {
+        try
+        {
+            var currentUserId = Client.Auth.CurrentUser?.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Debug.LogError("BeachService: Not logged in!");
+                return new List<SystemNotification>();
+            }
+
+            var response = await Client.From<SystemNotification>()
+                .Filter("recipient_id", Postgrest.Constants.Operator.Equals, currentUserId)
+                .Filter("is_read", Postgrest.Constants.Operator.Is, "false")
+                .Order("created_at", Postgrest.Constants.Ordering.Descending)
+                .Get();
+
+            var notifications = response.Models;
+
+            if (notifications.Count == 0)
+            {
+                Debug.Log("<color=cyan>No notifications. All quiet on the beach.</color>");
+            }
+            else
+            {
+                Debug.Log($"<color=yellow>You have {notifications.Count} notification(s):</color>");
+                foreach (var notif in notifications)
+                {
+                    var readStatus = notif.IsRead ? "[Read]" : "[Unread]";
+                    Debug.Log($"  <color=white>{readStatus} [{notif.Type}] {notif.Content}</color>");
+                }
+            }
+
+            return notifications;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"GetNotifications failed: {e.Message}");
+            return new List<SystemNotification>();
+        }
+    }
+
+    public async Task MarkNotificationAsRead(string notificationId)
+    {
+        try
+        {
+            var currentUserId = Client.Auth.CurrentUser?.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Debug.LogError("BeachService: Not logged in!");
+                return;
+            }
+
+            await Client.From<SystemNotification>()
+                .Filter("id", Postgrest.Constants.Operator.Equals, notificationId)
+                .Filter("recipient_id", Postgrest.Constants.Operator.Equals, currentUserId)
+                .Set(x => x.IsRead, true)
+                .Update();
+
+            Debug.Log($"<color=green>Notification {notificationId} marked as read.</color>");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"MarkNotificationAsRead failed: {e.Message}");
+        }
+    }
+
+    public async Task DeleteFriend(string friendId)
+    {
+        try
+        {
+            var currentUserId = Client.Auth.CurrentUser?.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Debug.LogError("BeachService: Not logged in!");
+                return;
+            }
+
+            await Client.From<Friendship>()
+                .Filter("user_id", Postgrest.Constants.Operator.Equals, currentUserId)
+                .Filter("friend_id", Postgrest.Constants.Operator.Equals, friendId)
+                .Delete();
+
+            Debug.Log($"<color=green>Friendship with {friendId} removed. The mirror deletion is handled by the database.</color>");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"DeleteFriend failed: {e.Message}");
+        }
+    }
 }
