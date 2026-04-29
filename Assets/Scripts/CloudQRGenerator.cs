@@ -31,8 +31,9 @@ public class CloudQRGenerator : MonoBehaviour
         // 3. Convert the BitMatrix into a Texture2D
         Texture2D qrTexture = new Texture2D(resolution, resolution, TextureFormat.RGBA32, false);
         
-        // Set filter mode to Point so the shader gets hard, exact pixels to work with
-        qrTexture.filterMode = FilterMode.Point; 
+        qrTexture.filterMode = FilterMode.Bilinear;
+        qrTexture.wrapMode = TextureWrapMode.Clamp;
+        // Prevents edges from wrapping around 
 
         Color32[] pixels = new Color32[resolution * resolution];
 
