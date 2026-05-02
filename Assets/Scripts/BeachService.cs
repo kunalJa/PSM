@@ -2,24 +2,30 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using DateTime = System.DateTime;
+using Newtonsoft.Json;
 
-public class BeachService : MonoBehaviour
+public class BeachService
 {
-    public static BeachService Instance { get; private set; }
-
-    private Supabase.Client Client => AppManager.Instance.SupabaseClient;
-
-    void Awake()
+    // --- PURE C# SINGLETON SETUP --- this is no longer a monobehavior but is now a instance
+    private static BeachService _instance;
+    public static BeachService Instance
     {
-        if (Instance == null)
+        get
         {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
+            if (_instance == null)
+            {
+                _instance = new BeachService();
+            }
+            return _instance;
         }
     }
+
+    // A private constructor prevents any other script from accidentally typing 'new BeachService()'
+    private BeachService() { }
+    // -------------------------------
+
+    private Supabase.Client Client => AppManager.Instance.SupabaseClient;
 
     public async Task CreatePost(string text, string mediaUrl = null)
     {
@@ -110,6 +116,60 @@ public class BeachService : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogError($"GetUnreadPosts failed: {e.Message}");
+        }
+    }
+
+    public class QRTokenResponse
+    {
+        [JsonProperty("token")]
+        public string token { get; set; }
+        
+        [JsonProperty("expires_at")]
+        public DateTime expires_at { get; set; }
+    }
+
+    public async Task<string> GetQRToken()
+    {
+        try
+        {
+            var currentUserId = Client.Auth.CurrentUser?.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Debug.LogError("BeachService: Not logged in!");
+                return null;
+            }
+
+            // Check if we have a stored token, and if it is valid
+            string storedToken = PlayerPrefs.GetString("QRToken", null);
+            string storedTokenExpiresAt = PlayerPrefs.GetString("QRTokenExpiresAt", null);
+            if (string.IsNullOrEmpty(storedToken) || string.IsNullOrEmpty(storedTokenExpiresAt) || DateTime.UtcNow > DateTime.Parse(storedTokenExpiresAt))
+            {
+                // Generate a new token
+                var rpcResponse = await Client.Rpc("refresh_my_qr_token", null);
+                Debug.Log($"RPC Response: {rpcResponse?.Content ?? "NULL"}");
+                
+                if (rpcResponse != null && !string.IsNullOrEmpty(rpcResponse.Content))
+                {
+                    // RPC returns an array with one row: [{"v_new_token": "...", "v_expiry": "..."}]
+                    var responseArray = JsonConvert.DeserializeObject<List<QRTokenResponse>>(rpcResponse.Content);
+                    if (responseArray != null && responseArray.Count > 0)
+                    {
+                        var response = responseArray[0];
+                        PlayerPrefs.SetString("QRToken", response.token);
+                        // Storing the exact server-side expiry time
+                        PlayerPrefs.SetString("QRTokenExpiresAt", response.expires_at.ToString("o"));
+                        PlayerPrefs.Save();
+                        return response.token;
+                    }
+                }
+            }
+
+            return storedToken;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"GetQRToken failed: {e.Message}");
+            return null;
         }
     }
 

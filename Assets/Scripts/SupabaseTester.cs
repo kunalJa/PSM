@@ -81,12 +81,6 @@ public class SupabaseTester : MonoBehaviour
     {
         Debug.Log("<color=yellow>--- Running Beach Service Tests ---</color>");
         
-        if (BeachService.Instance == null)
-        {
-            Debug.LogWarning("BeachService not found. Create a GameObject with BeachService attached.");
-            return;
-        }
-
         // Test: Notifications workflow
         Debug.Log("<color=magenta>--- Testing Notifications Workflow ---</color>");
         
