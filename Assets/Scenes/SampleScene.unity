@@ -245,50 +245,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 162825149}
   m_CullTransparentMesh: 1
---- !u!1 &164081269
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 164081271}
-  - component: {fileID: 164081270}
-  m_Layer: 0
-  m_Name: BeachManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &164081270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164081269}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1bbcc41fff6ca24797c07f165459677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BeachService
---- !u!4 &164081271
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164081269}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &172952906 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 88e97c9397f283c48899d0034e896ca3, type: 3}
@@ -789,7 +745,7 @@ GameObject:
   - component: {fileID: 414051700}
   - component: {fileID: 414051699}
   m_Layer: 0
-  m_Name: Empty
+  m_Name: Console
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1471,7 +1427,7 @@ GameObject:
   - component: {fileID: 1088907820}
   - component: {fileID: 1088907819}
   m_Layer: 0
-  m_Name: Quad
+  m_Name: QR_Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1489,7 +1445,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92e1c0f3d8d59084481ad1e8ec761991, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CloudQRGenerator
-  resolution: 33
   cloudMaterial: {fileID: 2100000, guid: 89facebcde3fd314da00865bf8ddef78, type: 2}
 --- !u!64 &1088907820
 MeshCollider:
@@ -1618,7 +1573,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -130.21997}
+  m_AnchoredPosition: {x: 0, y: -0.000030517578}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.43, y: 0.66}
 --- !u!114 &1096554653
@@ -2016,6 +1971,7 @@ GameObject:
   - component: {fileID: 1292276535}
   - component: {fileID: 1292276534}
   - component: {fileID: 1292276536}
+  - component: {fileID: 1292276537}
   m_Layer: 0
   m_Name: SupabaseManager
   m_TagString: Untagged
@@ -2064,6 +2020,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b65278b4aa992c429eb2ad67f5c80f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &1292276537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292276533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b927bbdb15782184282d5fae4d3617ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeepLinkManager
+  deeplinkURL: 
 --- !u!1 &1312268391
 GameObject:
   m_ObjectHideFlags: 0
@@ -3041,7 +3010,6 @@ SceneRoots:
   - {fileID: 1939084236}
   - {fileID: 211295824}
   - {fileID: 1292276535}
-  - {fileID: 164081271}
   - {fileID: 1029628676}
   - {fileID: 804653174}
   - {fileID: 414051700}

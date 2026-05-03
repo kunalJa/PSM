@@ -119,15 +119,6 @@ public class BeachService
         }
     }
 
-    public class QRTokenResponse
-    {
-        [JsonProperty("token")]
-        public string token { get; set; }
-        
-        [JsonProperty("expires_at")]
-        public DateTime expires_at { get; set; }
-    }
-
     public async Task<string> GetQRToken()
     {
         try
@@ -142,7 +133,7 @@ public class BeachService
             // Check if we have a stored token, and if it is valid
             string storedToken = PlayerPrefs.GetString("QRToken", null);
             string storedTokenExpiresAt = PlayerPrefs.GetString("QRTokenExpiresAt", null);
-            if (string.IsNullOrEmpty(storedToken) || string.IsNullOrEmpty(storedTokenExpiresAt) || DateTime.UtcNow > DateTime.Parse(storedTokenExpiresAt))
+            if (string.IsNullOrEmpty(storedToken) || string.IsNullOrEmpty(storedTokenExpiresAt) || System.DateTimeOffset.UtcNow > System.DateTimeOffset.Parse(storedTokenExpiresAt))
             {
                 // Generate a new token
                 var rpcResponse = await Client.Rpc("refresh_my_qr_token", null);
@@ -156,12 +147,16 @@ public class BeachService
                     {
                         var response = responseArray[0];
                         PlayerPrefs.SetString("QRToken", response.token);
-                        // Storing the exact server-side expiry time
-                        PlayerPrefs.SetString("QRTokenExpiresAt", response.expires_at.ToString("o"));
+                        // Store expiry as UTC ISO string
+                        PlayerPrefs.SetString("QRTokenExpiresAt", response.expires_at.ToUniversalTime().ToString("o"));
                         PlayerPrefs.Save();
                         return response.token;
                     }
                 }
+            }
+            else
+            {
+                Debug.Log($"Using stored QR token, it expires at {storedTokenExpiresAt}");
             }
 
             return storedToken;
@@ -173,7 +168,36 @@ public class BeachService
         }
     }
 
-    public async Task AddFriendByUsername(string username)
+    public async Task<bool> AddFriendByToken(string token)
+    {
+        try
+        {
+            var currentUserId = Client.Auth.CurrentUser?.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Debug.LogError("BeachService: Not logged in!");
+                return false;
+            }
+
+            var rpcResponse = await Client.Rpc("add_friend_via_qr", new Dictionary<string, object> { { "p_qr_token", token } });
+            Debug.Log($"RPC Response: {rpcResponse?.Content ?? "NULL"}");
+            
+            // RPC returns a single boolean: true
+            if (rpcResponse != null && !string.IsNullOrEmpty(rpcResponse.Content))
+            {
+                return JsonConvert.DeserializeObject<bool>(rpcResponse.Content);
+            }
+
+            return false;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"AddFriendByToken failed: {e.Message}");
+            return false;
+        }
+    }
+
+    private async Task AddFriendByUsername(string username)
     {
         try
         {
