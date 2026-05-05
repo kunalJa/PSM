@@ -1,5 +1,6 @@
 using UnityEngine;
-using Supabase; // Make sure you've imported the Supabase DLLs/Package
+using Supabase;
+using Supabase.Gotrue;
 using System.Threading.Tasks;
 
 public class AppManager : MonoBehaviour
@@ -11,8 +12,13 @@ public class AppManager : MonoBehaviour
     public string supabaseUrl = "https://zlkykoziuifkhevbwpdx.supabase.co";
     public string supabaseKey = "sb_publishable_bmTPJV3GAvCrOByAM2ng5g_XFGEimmu";
 
-    public Client SupabaseClient { get; private set; }
-
+    public Supabase.Client SupabaseClient { get; private set; }
+    
+    // Event fired when user logs in
+    public event System.Action OnUserReady;
+    
+    public bool IsUserReady => SupabaseClient?.Auth?.CurrentUser != null;
+    
     void Awake()
     {
         // This ensures there's only ever one manager
@@ -31,12 +37,24 @@ public class AppManager : MonoBehaviour
     {
         // Initialize Supabase
         var options = new SupabaseOptions { AutoRefreshToken = true };
-        SupabaseClient = new Client(supabaseUrl, supabaseKey, options);
+        SupabaseClient = new Supabase.Client(supabaseUrl, supabaseKey, options);
         await SupabaseClient.InitializeAsync();
         
         Debug.Log("Supabase is ready to bring in the mail!");
     }
-
+    
+    // Wrapper for SignIn that auto-fires OnUserReady
+    public async Task<Session> SignIn(string email, string password)
+    {
+        var session = await SupabaseClient.Auth.SignIn(email, password);
+        if (session != null)
+        {
+            Debug.Log($"AppManager: User signed in - {SupabaseClient.Auth.CurrentUser?.Email}");
+            OnUserReady?.Invoke();
+        }
+        return session;
+    }
+    
     public void SaveSession(string json)
     {
         // Scribble the login token onto the phone's memory

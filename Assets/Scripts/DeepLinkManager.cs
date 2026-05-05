@@ -1,10 +1,13 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 public class DeepLinkManager : MonoBehaviour
 {
     public static DeepLinkManager Instance { get; private set; }
     public string deeplinkURL;
+    private string pendingFriendToken = null;
+    private bool isSubscribed = false;
 
     private void Awake()
     {
@@ -44,19 +47,65 @@ public class DeepLinkManager : MonoBehaviour
         }
     }
 
-    private async void ProcessFriendRequest(string token)
+    private void ProcessFriendRequest(string token)
     {
-        Debug.Log("Attempting to add friend with token: " + token);
+        Debug.Log("Deep link received with token: " + token);
+        
+        // START loading here - covers both waiting for login AND the RPC call
+        // UIManager.Instance.ShowLoading("Connecting...");
 
-        // 1. IMMEDIATE FEEDBACK
-        // Call whatever UI manager you have to show a loading spinner
-        // UIManager.Instance.ShowLoading("Catching cloud...");
+        // If user is already logged in, process immediately
+        if (AppManager.Instance != null && AppManager.Instance.IsUserReady)
+        {
+            ExecuteAddFriend(token);
+        }
+        else
+        {
+            // Queue the token and safely subscribe when AppManager exists
+            Debug.Log("User not ready yet, queuing friend request...");
+            pendingFriendToken = token;
+            StartCoroutine(SubscribeWhenReady());
+        }
+    }
+
+    private IEnumerator SubscribeWhenReady()
+    {
+        // Wait until AppManager.Instance exists (handles Awake() order issue)
+        while (AppManager.Instance == null)
+        {
+            yield return null; // Wait one frame
+        }
+        
+        // Now safe to subscribe
+        if (!isSubscribed)
+        {
+            isSubscribed = true;
+            AppManager.Instance.OnUserReady += OnUserReady;
+            Debug.Log("Subscribed to OnUserReady event");
+        }
+    }
+
+    private void OnUserReady()
+    {
+        AppManager.Instance.OnUserReady -= OnUserReady;
+        isSubscribed = false;
+        
+        if (!string.IsNullOrEmpty(pendingFriendToken))
+        {
+            Debug.Log("User now ready, processing queued friend request...");
+            ExecuteAddFriend(pendingFriendToken);
+            pendingFriendToken = null;
+        }
+    }
+
+    private async void ExecuteAddFriend(string token)
+    {
+        // Loading already showing from ProcessFriendRequest()
 
         try
         {
             bool success = await BeachService.Instance.AddFriendByToken(token);
 
-            // 3. THE RESOLUTION (SUCCESS)
             if (success)
             {
                 // Update the UI for success
@@ -71,14 +120,11 @@ public class DeepLinkManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            // THE RESOLUTION (FAILURE)
             Debug.LogError("QR Scan Failed: " + e.Message);
-            // NotificationManager.Instance.ShowNotification("Scan failed. Try generating a new Cloud!");
         }
         finally
         {
-            // 4. CLEANUP
-            // This runs no matter what (success or fail), ensuring the loader always goes away.
+            // STOP loading here - always runs whether success, failure, or exception
             // UIManager.Instance.HideLoading();
         }
     }
