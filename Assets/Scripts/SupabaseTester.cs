@@ -14,45 +14,45 @@ public class SupabaseTester : MonoBehaviour
         var client = AppManager.Instance.SupabaseClient;
 
         // // 1. CHECK FOR SAVED SESSION
-        // string savedSessionJson = AppManager.Instance.GetSavedSession();
+        string savedSessionJson = AppManager.Instance.GetSavedSession();
 
-        // if (!string.IsNullOrEmpty(savedSessionJson))
-        // {
-        //     Debug.Log("Tester: Found saved session! Rehydrating via SDK...");
+        if (!string.IsNullOrEmpty(savedSessionJson))
+        {
+            Debug.Log("Tester: Found saved session! Rehydrating via SDK...");
             
-        //     try
-        //     {
-        //         var savedSession = Newtonsoft.Json.JsonConvert.DeserializeObject<Session>(savedSessionJson);
+            try
+            {
+                var savedSession = Newtonsoft.Json.JsonConvert.DeserializeObject<Session>(savedSessionJson);
                 
-        //         if (savedSession != null && !string.IsNullOrEmpty(savedSession.RefreshToken))
-        //         {
-        //             // Use the SDK's proper rehydration method: SignIn with RefreshToken
-        //             // This internally sets CurrentSession, CurrentUser, and updates API headers
-        //             var session = await client.Auth.SignIn(SignInType.RefreshToken, savedSession.RefreshToken);
+                if (savedSession != null && !string.IsNullOrEmpty(savedSession.RefreshToken))
+                {
+                    // Use the SDK's proper rehydration method: SignIn with RefreshToken
+                    // This internally sets CurrentSession, CurrentUser, and updates API headers
+                    var session = await client.Auth.SignIn(SignInType.RefreshToken, savedSession.RefreshToken);
                     
-        //             if (session != null)
-        //             {
-        //                 // Save the fresh session with new tokens
-        //                 string freshJson = Newtonsoft.Json.JsonConvert.SerializeObject(session);
-        //                 AppManager.Instance.SaveSession(freshJson);
+                    if (session != null)
+                    {
+                        // Save the fresh session with new tokens
+                        string freshJson = Newtonsoft.Json.JsonConvert.SerializeObject(session);
+                        AppManager.Instance.SaveSession(freshJson);
                         
-        //                 Debug.Log($"<color=cyan>WELCOME BACK!</color> {client.Auth.CurrentUser?.Email}");
-        //                 await RunBeachTests();
-        //                 return;
-        //             }
-        //         }
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         Debug.LogWarning($"Session restore failed: {e.Message}");
-        //         AppManager.Instance.ClearSession();
-        //     }
-        // }
+                        Debug.Log($"<color=cyan>WELCOME BACK!</color> {client.Auth.CurrentUser?.Email}");
+                        await RunBeachTests();
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Session restore failed: {e.Message}");
+                AppManager.Instance.ClearSession();
+            }
+        }
 
         // 2. IF NO SESSION OR EXPIRED, DO MANUAL LOGIN
         Debug.Log("Tester: Logging in...");
-        // await LoginAndSave("cozy_seagull_2@mailinator.com", "SafePassword123");
-        await LoginAndSave("mom@mailinator.com", "test");
+        await LoginAndSave("cozy_seagull_2@mailinator.com", "SafePassword123");
+        // await LoginAndSave("dad@mailinator.com", "test");
 
     }
 
