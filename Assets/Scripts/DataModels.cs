@@ -121,3 +121,10 @@ public class QRTokenResponse
     [JsonProperty("expires_at")]
     public DateTime expires_at { get; set; }
 }
+
+// App Data Models (not DB tables)
+public class FriendData
+{
+    public string Id { get; set; }
+    public string DisplayName { get; set; }  // nickname if exists, else username
+}

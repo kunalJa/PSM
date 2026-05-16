@@ -55,15 +55,17 @@ public class BeachService
         }
     }
 
-    public async Task GetUnreadPosts()
+    public async Task<List<Post>> GetUnreadPosts()
     {
+        var result = new List<Post>();
+        
         try
         {
             var currentUserId = Client.Auth.CurrentUser?.Id;
             if (string.IsNullOrEmpty(currentUserId))
             {
                 Debug.LogError("BeachService: Not logged in!");
-                return;
+                return result;
             }
 
             // Get all read post IDs for current user
@@ -83,7 +85,7 @@ public class BeachService
             if (friendIds.Count == 0)
             {
                 Debug.Log("<color=yellow>No friends yet. The beach is quiet...</color>");
-                return;
+                return result;
             }
 
             // Get posts from friends, excluding already-read posts (server-side)
@@ -99,24 +101,27 @@ public class BeachService
                 .Order("created_at", Postgrest.Constants.Ordering.Descending)
                 .Get();
 
-            var unreadPosts = postsResponse.Models;
+            result = postsResponse.Models;
 
-            if (unreadPosts.Count == 0)
+            if (result.Count == 0)
             {
                 Debug.Log("<color=cyan>No new letters today. The seagulls rest.</color>");
-                return;
             }
-
-            Debug.Log($"<color=yellow>You have {unreadPosts.Count} unread letter(s)!</color>");
-            foreach (var post in unreadPosts)
+            else
             {
-                Debug.Log($"  <color=white>From {post.AuthorId}: {post.ContentText}</color>");
+                Debug.Log($"<color=yellow>You have {result.Count} unread letter(s)!</color>");
+                foreach (var post in result)
+                {
+                    Debug.Log($"  <color=white>From {post.AuthorId}: {post.ContentText}</color>");
+                }
             }
         }
         catch (System.Exception e)
         {
             Debug.LogError($"GetUnreadPosts failed: {e.Message}");
         }
+        
+        return result;
     }
 
     public async Task<string> GetQRToken()
@@ -197,67 +202,69 @@ public class BeachService
         }
     }
 
-    private async Task AddFriendByUsername(string username)
+    // private async Task AddFriendByUsername(string username)
+    // {
+    //     try
+    //     {
+    //         var currentUserId = Client.Auth.CurrentUser?.Id;
+    //         if (string.IsNullOrEmpty(currentUserId))
+    //         {
+    //             Debug.LogError("BeachService: Not logged in!");
+    //             return;
+    //         }
+
+    //         // Find the profile with this username
+    //         var profileResponse = await Client.From<Profile>()
+    //             .Filter("username", Postgrest.Constants.Operator.Equals, username)
+    //             .Single();
+
+    //         if (profileResponse == null)
+    //         {
+    //             Debug.LogWarning($"<color=orange>No user found with username: {username}</color>");
+    //             return;
+    //         }
+
+    //         var friendId = profileResponse.Id;
+
+    //         // Check if already friends
+    //         var existingFriendship = await Client.From<Friendship>()
+    //             .Filter("user_id", Postgrest.Constants.Operator.Equals, currentUserId)
+    //             .Filter("friend_id", Postgrest.Constants.Operator.Equals, friendId)
+    //             .Get();
+
+    //         if (existingFriendship.Models.Count > 0)
+    //         {
+    //             Debug.Log($"<color=cyan>Already friends with {username}!</color>");
+    //             return;
+    //         }
+
+    //         // Create friendship
+    //         var friendship = new Friendship
+    //         {
+    //             UserId = currentUserId,
+    //             FriendId = friendId
+    //         };
+
+    //         await Client.From<Friendship>().Insert(friendship);
+    //         Debug.Log($"<color=green>Added {username} as a friend!</color>");
+    //     }
+    //     catch (System.Exception e)
+    //     {
+    //         Debug.LogError($"AddFriendByUsername failed: {e.Message}");
+    //     }
+    // }
+
+    public async Task<List<FriendData>> GetAllFriends()
     {
+        var result = new List<FriendData>();
+        
         try
         {
             var currentUserId = Client.Auth.CurrentUser?.Id;
             if (string.IsNullOrEmpty(currentUserId))
             {
                 Debug.LogError("BeachService: Not logged in!");
-                return;
-            }
-
-            // Find the profile with this username
-            var profileResponse = await Client.From<Profile>()
-                .Filter("username", Postgrest.Constants.Operator.Equals, username)
-                .Single();
-
-            if (profileResponse == null)
-            {
-                Debug.LogWarning($"<color=orange>No user found with username: {username}</color>");
-                return;
-            }
-
-            var friendId = profileResponse.Id;
-
-            // Check if already friends
-            var existingFriendship = await Client.From<Friendship>()
-                .Filter("user_id", Postgrest.Constants.Operator.Equals, currentUserId)
-                .Filter("friend_id", Postgrest.Constants.Operator.Equals, friendId)
-                .Get();
-
-            if (existingFriendship.Models.Count > 0)
-            {
-                Debug.Log($"<color=cyan>Already friends with {username}!</color>");
-                return;
-            }
-
-            // Create friendship
-            var friendship = new Friendship
-            {
-                UserId = currentUserId,
-                FriendId = friendId
-            };
-
-            await Client.From<Friendship>().Insert(friendship);
-            Debug.Log($"<color=green>Added {username} as a friend!</color>");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"AddFriendByUsername failed: {e.Message}");
-        }
-    }
-
-    public async Task GetAllFriends()
-    {
-        try
-        {
-            var currentUserId = Client.Auth.CurrentUser?.Id;
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                Debug.LogError("BeachService: Not logged in!");
-                return;
+                return result;
             }
 
             // Get all friendships for current user
@@ -268,15 +275,13 @@ public class BeachService
             if (friendships.Models.Count == 0)
             {
                 Debug.Log("<color=yellow>No friends on the beach yet...</color>");
-                return;
+                return result;
             }
 
             Debug.Log($"<color=cyan>Friends on the beach ({friendships.Models.Count}):</color>");
 
             foreach (var friendship in friendships.Models)
             {
-                Debug.Log($"  Looking up friend_id: {friendship.FriendId}");
-                
                 try
                 {
                     // Fetch each friend's profile
@@ -287,7 +292,18 @@ public class BeachService
                     if (profileResponse.Models.Count > 0)
                     {
                         var profile = profileResponse.Models[0];
-                        Debug.Log($"  <color=white>{profile.Username}</color>");
+                        // Use nickname if defined, otherwise use username
+                        var displayName = !string.IsNullOrEmpty(friendship.Nickname) 
+                            ? friendship.Nickname 
+                            : profile.Username;
+                        
+                        result.Add(new FriendData
+                        {
+                            Id = friendship.FriendId,
+                            DisplayName = displayName
+                        });
+                        
+                        Debug.Log($"  <color=white>{displayName}</color>");
                     }
                     else
                     {
@@ -304,6 +320,8 @@ public class BeachService
         {
             Debug.LogError($"GetAllFriends failed: {e.Message}");
         }
+        
+        return result;
     }
 
     public async Task MarkAsRead(string postId)
