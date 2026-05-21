@@ -9,7 +9,7 @@ public class RolodexClickHandler : MonoBehaviour, IPointerClickHandler // 2. Add
 
     [Header("Click Settings")]
     [Tooltip("How many seconds to ignore clicks after the rolodex is clicked.")]
-    public float clickCooldown = 1.1f; // Set this to roughly the length of your animation
+    public float clickCooldown = 0.5f; // Set this to roughly the length of your animation
     
     private float nextAllowedClickTime = 0f;
 
