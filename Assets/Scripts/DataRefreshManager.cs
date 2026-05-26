@@ -49,8 +49,7 @@ public class DataRefreshManager : MonoBehaviour
         
         // If data was already loaded before we subscribed, initialize now
         if (AppDataOrchestrator.Instance.Friends.Count > 0 || 
-            AppDataOrchestrator.Instance.Notifications.Count > 0 || 
-            AppDataOrchestrator.Instance.Posts.Count > 0)
+            AppDataOrchestrator.Instance.Notifications.Count > 0)
         {
             Debug.Log("DataRefreshManager: Data already loaded, initializing immediately");
             OnInitialDataLoaded();

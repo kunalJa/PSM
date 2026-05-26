@@ -31,7 +31,6 @@ public class ProgrammaticPolaroid : MonoBehaviour
             deleteButton.onClick.AddListener(DeleteCurrentPhoto);
             deleteButton.gameObject.SetActive(false); // Hide the X initially since there is no photo
         }
-        ApplyFetchedPhoto("https://picsum.photos/200/300");
     }
 
     public async void ApplyFetchedPhoto(string pathOrUrl)
@@ -50,6 +49,24 @@ public class ProgrammaticPolaroid : MonoBehaviour
             // Show the X button now that an image exists
             if (deleteButton != null) deleteButton.gameObject.SetActive(true);
         }
+    }
+
+    public void ApplyPreloadedTexture(Texture2D texture)
+    {
+        if (texture == null)
+        {
+            Debug.LogWarning("ApplyPreloadedTexture: texture is null, skipping assignment");
+            return;
+        }
+        if (_meshRenderer == null)
+        {
+            Debug.LogError("ApplyPreloadedTexture: _meshRenderer is null");
+            return;
+        }
+        ClearActiveTextureFromVRAM();
+        _activeRuntimeTexture = texture;
+        AssignTextureToSlot(_activeRuntimeTexture);
+        if (deleteButton != null) deleteButton.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -103,12 +120,32 @@ public class ProgrammaticPolaroid : MonoBehaviour
 
     private void AssignTextureToSlot(Texture2D texture)
     {
+        if (_meshRenderer == null)
+        {
+            Debug.LogError("AssignTextureToSlot: _meshRenderer is null");
+            return;
+        }
+
         Material[] currentMaterials = _meshRenderer.materials;
+        if (currentMaterials == null || currentMaterials.Length == 0)
+        {
+            Debug.LogError("AssignTextureToSlot: materials array is null or empty");
+            return;
+        }
 
         if (photoMaterialIndex < currentMaterials.Length)
+        {
+            if (currentMaterials[photoMaterialIndex] == null)
             {
+                Debug.LogError($"AssignTextureToSlot: material at index {photoMaterialIndex} is null");
+                return;
+            }
             currentMaterials[photoMaterialIndex].SetTexture(texturePropertyName, texture);
             _meshRenderer.materials = currentMaterials;
+        }
+        else
+        {
+            Debug.LogError($"AssignTextureToSlot: photoMaterialIndex {photoMaterialIndex} out of bounds (materials length: {currentMaterials.Length})");
         }
     }
 
