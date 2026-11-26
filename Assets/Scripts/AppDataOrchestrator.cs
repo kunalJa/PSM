@@ -126,7 +126,7 @@ public class AppDataOrchestrator : MonoBehaviour
             Notifications = notificationsTask.Result;
             SmartMergeUnreadPosts(postsTask.Result);
             
-            Debug.Log($"<color=green>Data loaded:</color> {Friends.Count} friends, {Notifications.Count} notifications, {_pendingPosts.Count + _readyPosts.Count} unread posts");
+            Debug.Log($"<color=green>Data loaded:</color> {Friends.Count} friends, {Notifications.Count} notifications, {postsTask.Result.Count} unread posts");
             
             // Fire events for UI managers
             OnFriendsLoaded?.Invoke(Friends);
@@ -164,6 +164,39 @@ public class AppDataOrchestrator : MonoBehaviour
     {
         int addedCount = 0;
 
+        var freshIds = new HashSet<string>(freshPosts.Select(p => p.Id));
+
+        int removedCount = 0;
+        if (_pendingPosts.Count > 0)
+        {
+            var keptPending = _pendingPosts.Where(p => freshIds.Contains(p.Id)).ToList();
+            removedCount += _pendingPosts.Count - keptPending.Count;
+            _pendingPosts = new Queue<Post>(keptPending);
+        }
+        if (_readyPosts.Count > 0)
+        {
+            var keptReady = new Queue<(Post post, Texture2D tex)>();
+            foreach (var entry in _readyPosts)
+            {
+                if (freshIds.Contains(entry.post.Id))
+                {
+                    keptReady.Enqueue(entry);
+                }
+                else
+                {
+                    if (entry.tex != null) Destroy(entry.tex);
+                    removedCount++;
+                }
+            }
+            _readyPosts = keptReady;
+        }
+        _knownPostIds.RemoveWhere(id => !freshIds.Contains(id) && id != _inFlightPostId);
+
+        if (removedCount > 0)
+        {
+            Debug.Log($"<color=cyan>SmartMerge: Removed {removedCount} posts no longer unread on server</color>");
+        }
+
         foreach (var post in freshPosts)
         {
             if (post.Id == _inFlightPostId) continue;
@@ -185,6 +218,7 @@ public class AppDataOrchestrator : MonoBehaviour
             Debug.Log($"<color=cyan>SmartMerge: Added {addedCount} new posts to pending queue</color>");
         }
 
+        MessengerBirdManager.Instance?.SetBirdCount(Mathf.Min(_readyPosts.Count, 2));
         StartPrefetchIfNeeded();
     }
 
@@ -207,6 +241,12 @@ public class AppDataOrchestrator : MonoBehaviour
 
             string url = !string.IsNullOrEmpty(post.MediaUrl) ? post.MediaUrl : MOCK_MEDIA_URL;
             Texture2D tex = await TextureFetchUtility.FetchAsync(url);
+
+            if (!_knownPostIds.Contains(post.Id))
+            {
+                if (tex != null) Destroy(tex);
+                continue;
+            }
 
             _readyPosts.Enqueue((post, tex));
             MessengerBirdManager.Instance?.SetBirdCount(Mathf.Min(_readyPosts.Count, 2));
