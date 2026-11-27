@@ -15,8 +15,16 @@ public class BirdVisual : MonoBehaviour
     [Tooltip("Local offset (relative to the BirdSlot) that the bird flies in from / out to.")]
     [SerializeField] private Vector3 offscreenLocalOffset = new Vector3(0f, 8f, 0f);
 
+    [Tooltip("Random variation added to the fly-in START position, per axis. Each component is a +/- range; a random value in that range is picked each flight.")]
+    [SerializeField] private Vector3 flyInStartRandomness = Vector3.zero;
+
     [SerializeField] private float flyInDuration = 1.2f;
     [SerializeField] private float flyOutDuration = 0.9f;
+
+    [Tooltip("Easing for the fly-in: x is normalized time 0-1, y is progress 0-1. Steep start + shallow end = fast entry, gentle deceleration.")]
+    [SerializeField] private AnimationCurve flyInEase = new AnimationCurve(
+        new Keyframe(0f, 0f, 0f, 2.2f),   // steep out-tangent: fast start
+        new Keyframe(1f, 1f, 0.35f, 0f)); // shallow in-tangent: slows but doesn't stop dead
 
     [Tooltip("Animator on the Seagull model (child). Auto-found if left empty.")]
     [SerializeField] private Animator birdAnimator;
@@ -26,6 +34,7 @@ public class BirdVisual : MonoBehaviour
 
     private Coroutine _activeRoutine;
     private Vector3 _homeLocalPosition; // the bird's natural slot position, captured from the scene
+    private Vector3 _flyInStartPosition; // randomized start point, chosen once per fly-in
 
     void Awake()
     {
@@ -53,7 +62,13 @@ public class BirdVisual : MonoBehaviour
     {
         if (_activeRoutine != null) StopCoroutine(_activeRoutine);
         gameObject.SetActive(true);
-        transform.localPosition = _homeLocalPosition + offscreenLocalOffset;
+        // Pick the randomized start point once so the initial position and the
+        // coroutine's lerp start agree with each other.
+        _flyInStartPosition = _homeLocalPosition + offscreenLocalOffset + new Vector3(
+            UnityEngine.Random.Range(-flyInStartRandomness.x, flyInStartRandomness.x),
+            UnityEngine.Random.Range(-flyInStartRandomness.y, flyInStartRandomness.y),
+            UnityEngine.Random.Range(-flyInStartRandomness.z, flyInStartRandomness.z));
+        transform.localPosition = _flyInStartPosition;
         if (birdAnimator != null)
             birdAnimator.Play(0, 0, UnityEngine.Random.value); // Random start position in the animation for variation
         _activeRoutine = StartCoroutine(FlyInRoutine());
@@ -74,12 +89,12 @@ public class BirdVisual : MonoBehaviour
     {
         IsBusy = true;
         float t = 0f;
-        Vector3 start = _homeLocalPosition + offscreenLocalOffset;
+        Vector3 start = _flyInStartPosition;
         Vector3 end = _homeLocalPosition;
         while (t < flyInDuration)
         {
             t += Time.deltaTime;
-            float p = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / flyInDuration));
+            float p = flyInEase.Evaluate(Mathf.Clamp01(t / flyInDuration));
             transform.localPosition = Vector3.LerpUnclamped(start, end, p);
             yield return null;
         }
