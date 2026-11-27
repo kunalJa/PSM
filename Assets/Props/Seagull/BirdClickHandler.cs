@@ -9,18 +9,16 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(Collider))]
 public class BirdClickHandler : MonoBehaviour, IPointerClickHandler
 {
-    [Tooltip("The BirdVisual this clickable bird represents. Usually the same GameObject.")]
-    [SerializeField] private BirdVisual birdVisual;
+    private BirdVisual _birdVisual;
 
-    void Reset()
+    void Awake()
     {
-        // Auto-wire if BirdVisual is on the same GameObject
-        birdVisual = GetComponent<BirdVisual>();
+        _birdVisual = GetComponent<BirdVisual>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         if (LetterUIController.IsOpen) return;
-        MessengerBirdManager.Instance?.OnBirdClicked(birdVisual);
+        MessengerBirdManager.Instance?.OnBirdClicked(_birdVisual);
     }
 }

@@ -55,7 +55,7 @@ public class BirdVisual : MonoBehaviour
         gameObject.SetActive(true);
         transform.localPosition = _homeLocalPosition + offscreenLocalOffset;
         if (birdAnimator != null)
-            birdAnimator.Play(0, 0, UnityEngine.Random.value);
+            birdAnimator.Play(0, 0, UnityEngine.Random.value); // Random start position in the animation for variation
         _activeRoutine = StartCoroutine(FlyInRoutine());
     }
 

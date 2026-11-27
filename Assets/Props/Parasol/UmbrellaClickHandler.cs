@@ -9,6 +9,8 @@ public class UmbrellaClickHandler : MonoBehaviour, IPointerClickHandler
     {
         if (anim != null)
         {
+            if (anim.IsInTransition(0)) return; // ignore clicks mid-transition
+
             AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
             if (stateInfo.IsName("Looking at Sky"))
             {
