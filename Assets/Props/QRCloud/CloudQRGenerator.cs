@@ -28,10 +28,12 @@ public class CloudQRGenerator : MonoBehaviour
     }
     // -----------------------
     
-    [Header("QR Settings")]    
-    // The material holding your Cloud Shader Graph
-    public Material cloudMaterial; 
-    public Material simpleMaterial;
+    [Header("QR Settings")]
+    [Tooltip("Renderer of the QR quad. The texture is written to a per-renderer MaterialPropertyBlock, so it survives material swaps.")]
+    public Renderer qrRenderer;
+
+    private MaterialPropertyBlock _propertyBlock;
+    private Texture2D _currentTexture;
 
     public string createDeepLink(string friendToken) 
     {
@@ -90,16 +92,23 @@ public class CloudQRGenerator : MonoBehaviour
         qrTexture.SetPixels32(pixels);
         qrTexture.Apply();
 
-        // 5. Pass the generated texture to your Shader Graph
-        if (cloudMaterial != null)
+        // 5. Pass the texture to the quad via property block — follows the renderer
+        // across material swaps, and never mutates the shared material assets.
+        if (qrRenderer != null)
         {
-            // Make sure your Shader Graph has a Texture2D property named "_QRMask"
-            cloudMaterial.SetTexture("_QRMask", qrTexture);
+            if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
+            qrRenderer.GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetTexture("_QRMask", qrTexture);
+            qrRenderer.SetPropertyBlock(_propertyBlock);
         }
-        if (simpleMaterial != null)
+        else
         {
-            simpleMaterial.SetTexture("_QRMask", qrTexture);
+            Debug.LogError("CloudQRGenerator: qrRenderer is not assigned!");
         }
+
+        // Free the previous QR texture now that the renderer references the new one
+        if (_currentTexture != null) Destroy(_currentTexture);
+        _currentTexture = qrTexture;
     }
 
     void Start()
