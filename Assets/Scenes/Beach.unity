@@ -2426,7 +2426,7 @@ MonoBehaviour:
   offscreenLocalOffset: {x: 13, y: 2, z: 18}
   flyInStartRandomness: {x: 2, y: 4, z: 4}
   flyInDuration: 4.5
-  flyOutDuration: 0.9
+  flyOutDuration: 4.5
   flyInEase:
     serializedVersion: 2
     m_Curve:
@@ -4517,7 +4517,7 @@ MonoBehaviour:
   offscreenLocalOffset: {x: -20, y: 0, z: -4}
   flyInStartRandomness: {x: 3, y: 2, z: 2}
   flyInDuration: 4.5
-  flyOutDuration: 0.9
+  flyOutDuration: 4.5
   flyInEase:
     serializedVersion: 2
     m_Curve:

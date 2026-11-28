@@ -7,7 +7,6 @@ public class MessengerBirdManager : MonoBehaviour
     [Tooltip("Bird visuals, one per orbit slot. Order matches slot order under BirdOrbitRig.")]
     [SerializeField] private BirdVisual[] birdSlots = new BirdVisual[2];
     [SerializeField] private LetterUIController letterUI;
-    // TODO: [SerializeField] private Animator birdAnimator;   uncomment when artist delivers per-bird flight anim
 
     private int _targetCount = 0;
 
@@ -79,30 +78,38 @@ public class MessengerBirdManager : MonoBehaviour
     {
         if (clickedBird == null || clickedBird.IsBusy || !clickedBird.IsVisible) return;
 
-        var result = AppDataOrchestrator.Instance.DequeuePost();
-        if (result == null)
-        {
-            Debug.LogWarning("MessengerBirdManager: clicked bird but no ready posts");
-            return;
-        }
-
-        var (post, texture) = result.Value;
-        Debug.Log($"<color=green>MessengerBirdManager: bird delivering letter from {post.AuthorId}</color>");
+        // Start the fly-out BEFORE dequeuing: DequeuePost lowers the bird count and
+        // triggers SyncSlots, which must see this bird as busy so it doesn't hide a
+        // different bird to compensate.
+        (Post post, Texture2D tex)? result = null;
 
         clickedBird.FlyOut(() =>
         {
-            if (letterUI != null)
+            if (result != null)
             {
-                letterUI.PrepareDroppedLetter(post, texture);
-            }
-            else
-            {
-                Debug.LogError("MessengerBirdManager: LetterUIController reference not set!");
+                var (post, texture) = result.Value;
+                if (letterUI != null)
+                {
+                    letterUI.PrepareDroppedLetter(post, texture);
+                }
+                else
+                {
+                    Debug.LogError("MessengerBirdManager: LetterUIController reference not set!");
+                }
             }
 
             // Slot is now empty; if the pipeline backfilled while the bird was leaving,
             // fly a fresh bird into the freed slot.
             SyncSlots();
         });
+
+        result = AppDataOrchestrator.Instance.DequeuePost();
+        if (result == null)
+        {
+            Debug.LogWarning("MessengerBirdManager: clicked bird but no ready posts");
+            return;
+        }
+
+        Debug.Log($"<color=green>MessengerBirdManager: bird delivering letter from {result.Value.post.AuthorId}</color>");
     }
 }
