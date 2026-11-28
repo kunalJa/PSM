@@ -2423,10 +2423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 618720ebb8744f54e8a39fbd6dc6ec4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BirdVisual
+  birdAnimator: {fileID: 842300938}
   offscreenLocalOffset: {x: 13, y: 2, z: 18}
   flyInStartRandomness: {x: 2, y: 4, z: 4}
   flyInDuration: 4.5
-  flyOutDuration: 4.5
   flyInEase:
     serializedVersion: 2
     m_Curve:
@@ -2460,7 +2460,17 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  birdAnimator: {fileID: 842300938}
+  breakAwayTurnSpeed: 50
+  breakAwayRampTime: 0.5
+  breakAwayAcceleration: 8
+  flightCamera: {fileID: 0}
+  deliveryPassDuration: 0.35
+  passDistanceFromCamera: 2
+  passViewportHeight: 0.575
+  dropAtPassProgress: 0.475
+  offscreenViewportMargin: 0.5
+  faceFlightDirection: 1
+  modelForwardEuler: {x: 0, y: 0, z: 0}
 --- !u!65 &842300941
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4514,10 +4524,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 618720ebb8744f54e8a39fbd6dc6ec4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BirdVisual
+  birdAnimator: {fileID: 1526600903}
   offscreenLocalOffset: {x: -20, y: 0, z: -4}
   flyInStartRandomness: {x: 3, y: 2, z: 2}
   flyInDuration: 4.5
-  flyOutDuration: 4.5
   flyInEase:
     serializedVersion: 2
     m_Curve:
@@ -4551,7 +4561,17 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  birdAnimator: {fileID: 1526600903}
+  breakAwayTurnSpeed: 50
+  breakAwayRampTime: 0.5
+  breakAwayAcceleration: 9
+  flightCamera: {fileID: 0}
+  deliveryPassDuration: 0.35
+  passDistanceFromCamera: 2
+  passViewportHeight: 0.575
+  dropAtPassProgress: 0.475
+  offscreenViewportMargin: 0.5
+  faceFlightDirection: 1
+  modelForwardEuler: {x: 0, y: 0, z: 0}
 --- !u!65 &1526600906
 BoxCollider:
   m_ObjectHideFlags: 0

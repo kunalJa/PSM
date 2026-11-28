@@ -97,7 +97,9 @@ public class MessengerBirdManager : MonoBehaviour
                     Debug.LogError("MessengerBirdManager: LetterUIController reference not set!");
                 }
             }
-
+        },
+        () =>
+        {
             // Slot is now empty; if the pipeline backfilled while the bird was leaving,
             // fly a fresh bird into the freed slot.
             SyncSlots();
