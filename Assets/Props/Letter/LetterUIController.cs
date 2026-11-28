@@ -36,6 +36,7 @@ public class LetterUIController : MonoBehaviour
         _currentPostId = post.Id;
         IsOpen = true;
         gameObject.SetActive(true);
+        ResetAnimatorToClosed();
 
         if (contentText != null)
             contentText.text = post.ContentText ?? "";
@@ -70,13 +71,6 @@ public class LetterUIController : MonoBehaviour
 
     public void OnClose()
     {
-        // Trigger close animation
-        if (letterAnimator != null)
-        {
-            letterAnimator.ResetTrigger("LetterOpen");
-            letterAnimator.SetTrigger("LetterClose");
-        }
-
         // Mark as read (fire-and-forget)
         if (!string.IsNullOrEmpty(_currentPostId))
         {
@@ -86,6 +80,18 @@ public class LetterUIController : MonoBehaviour
         Debug.Log($"<color=yellow>LetterUIController: Closed letter {_currentPostId}</color>");
         _currentPostId = null;
         IsOpen = false;
+
+        // Put the envelope back in its sealed starting pose BEFORE hiding, so the next
+        // delivery starts from a fresh closed envelope instead of the open one.
+        ResetAnimatorToClosed();
+        gameObject.SetActive(false);
+    }
+
+    private void ResetAnimatorToClosed()
+    {
+        if (letterAnimator == null || !letterAnimator.isActiveAndEnabled) return;
+        letterAnimator.Rebind();
+        letterAnimator.Update(0f);
     }
 
     private System.Collections.IEnumerator ScrollToTop()

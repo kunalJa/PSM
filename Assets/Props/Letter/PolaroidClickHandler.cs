@@ -23,6 +23,7 @@ public class PolaroidClickHandler : MonoBehaviour, IPointerClickHandler
     void OnDisable()
     {
         EnhancedTouchSupport.Disable();
+        isPolaroidOpen = false;
     }
 
     // Update is called once per frame

@@ -23,6 +23,7 @@ public class PostcardClickHandler : MonoBehaviour, IPointerClickHandler
     void OnDisable()
     {
         EnhancedTouchSupport.Disable();
+        isLetterOpen = false;
     }
 
     // Update is called once per frame
